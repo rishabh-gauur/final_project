@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - HealthAlert</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="glass-card dashboard-container">
+        <div class="header">
+            <div>
+                <h1 style="text-align: left; margin:0;" id="welcome-msg">Dashboard</h1>
+                <p style="color: var(--text-muted); margin-top:0.5rem;" id="nurse-info">Nurse ID: ...</p>
+            </div>
+            <button class="btn btn-secondary" style="width: auto;" onclick="logout()">Log Out</button>
+        </div>
+
+        <p>Submit patient vital signs. The ML model will analyze the data to predict risks and trigger an SMS alert if needed.</p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
+            <!-- Patient Input Form -->
+            <div>
+                <h3 style="margin-bottom: 1rem;">Patient Telemetry</h3>
+                <form id="predict-form">
+                    <div class="stats-grid">
+                        <div class="input-group">
+                            <label for="hr">Heart Rate (bpm)</label>
+                            <input type="number" id="hr" required placeholder="e.g. 75" value="75">
+                        </div>
+                        <div class="input-group">
+                            <label for="sys_bp">Systolic BP</label>
+                            <input type="number" id="sys_bp" required placeholder="e.g. 120" value="120">
+                        </div>
+                        <div class="input-group">
+                            <label for="dia_bp">Diastolic BP</label>
+                            <input type="number" id="dia_bp" required placeholder="e.g. 80" value="80">
+                        </div>
+                        <div class="input-group">
+                            <label for="spo2">SpO2 (%)</label>
+                            <input type="number" id="spo2" required placeholder="e.g. 98" value="98">
+                        </div>
+                        <div class="input-group">
+                            <label for="temp">Temperature (°C)</label>
+                            <input type="number" step="0.1" id="temp" required placeholder="e.g. 36.5" value="36.5">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn" style="margin-top: 1rem;">Analyze Vitals</button>
+                </form>
+            </div>
+
+            <!-- Results Section -->
+            <div>
+                <h3 style="margin-bottom: 1rem;">ML Prediction Results</h3>
+                <div class="glass-card" style="padding: 1.5rem; margin-bottom: 1rem;">
+                    <p style="margin-bottom: 0.5rem;"><strong>Risk Probability:</strong> <span id="res-prob">--</span></p>
+                    <p><strong>Diagnosis:</strong> <span id="res-diag">--</span></p>
+                </div>
+
+                <div id="alert-box" class="alert-box">
+                    <h3>SMS Alert Dispatched</h3>
+                    <p>A high health risk predictability was found. An emergency notification was dispatched to your mobile number.</p>
+                </div>
+                
+                <div id="safe-box" class="alert-box success">
+                    <h3>Patient Stable</h3>
+                    <p>The ML model predicts normal physiology. No intervention necessary.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Check Auth immediately on dashboard load
+        const nurse = JSON.parse(localStorage.getItem('nurse'));
+        if (!nurse) {
+            window.location.href = 'index.html';
+        } else {
+            document.getElementById('welcome-msg').innerText = `Hello, ${nurse.name}`;
+            document.getElementById('nurse-info').innerText = `Nurse ID: ${nurse.user_id} | Phone: ${nurse.mobile_number}`;
+        }
+    </script>
+</body>
+</html>
