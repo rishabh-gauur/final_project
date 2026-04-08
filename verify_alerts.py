@@ -36,13 +36,15 @@ def test_alert():
         print("[warning] PUSHOVER credentials not found in environment!")
         print("NOTE: On Render, you MUST set these in the dashboard Environment Variables.")
     
-    success = send_mobile_push(dummy_name, dummy_ward, dummy_bed, dummy_vitals, dummy_prob)
+    success, msg = send_mobile_push(dummy_name, dummy_ward, dummy_bed, dummy_vitals, dummy_prob)
     
     if success:
-        print("\n[success] Automated Broadcast Hand-off Successful!")
+        print(f"\n[success] {msg}")
+        print("Note: You should have also seen a Windows Notification box on this laptop.")
         print("Check all devices logged into your Pushover ID.")
     else:
-        print("\n[fail] Alert failed. Re-verify your User Key and App Token.")
+        print(f"\n[fail] Alert failed: {msg}")
+        print("Check your .env file keys locally, and Environment Variables on Render.")
 
 if __name__ == "__main__":
     test_alert()
