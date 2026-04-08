@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Administration - Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+
+        body {
+            background-color: var(--bg-color);
+        }
+
+        .hospital-logo {
+            background-color: rgba(79, 70, 229, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="hospital-logo">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+            </div>
+            <h2>Admin Login</h2>
+            <p>Secure system access for administrators</p>
+        </div>
+
+        <form id="loginForm" class="login-form">
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+            <div class="form-group" style="margin-bottom: 0.5rem;">
+                <label for="role" style="font-weight: 700; color: var(--primary-color);">Login As</label>
+                <select id="role" name="role" style="padding: 0.75rem 1rem; border: 2px solid var(--primary-color); border-radius: 6px; font-size: 1rem; font-family: inherit; background-color: #1e1e2d; color: white;" required>
+                    <option value="staff">Staff Portal</option>
+                    <option value="admin" selected>Admin Control Panel</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="username">Username or Email</label>
+                <input type="text" id="username" name="username" placeholder="Enter admin username or email" required
+                    autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required
+                    autocomplete="current-password">
+            </div>
+
+            <button type="submit" class="btn-primary" id="loginBtn">Access Control Panel</button>
+        </form>
+
+        <div class="login-footer">
+            <p>Don't have admin privileges? <a href="admin-register.html"
+                    style="color: var(--primary-color); text-decoration: none; font-weight: 600;">Request Access</a></p>
+        </div>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const loginBtn = document.getElementById('loginBtn');
+        const roleSelect = document.getElementById('role');
+
+        roleSelect.addEventListener('change', (e) => {
+            if (e.target.value === 'staff') {
+                window.location.href = 'login.html';
+            }
+        });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('error')) {
+            showError(urlParams.get('error'));
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!username || !password) return showError('Please fill in both fields.');
+
+            errorMessage.style.display = 'none';
+            loginBtn.textContent = 'Authenticating...';
+            loginBtn.disabled = true;
+
+            try {
+                const response = await fetch('http://localhost:5000/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    localStorage.setItem('nurse', JSON.stringify(data.nurse));
+                    window.location.href = data.redirect;
+                } else {
+                    showError(data.message || data.error || 'Login failed.');
+                    loginBtn.textContent = 'Access Control Panel';
+                    loginBtn.disabled = false;
+                }
+            } catch (error) {
+                showError('A network error occurred.');
+                loginBtn.textContent = 'Access Control Panel';
+                loginBtn.disabled = false;
+            }
+        });
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+    </script>
+</body>
+
+</html>

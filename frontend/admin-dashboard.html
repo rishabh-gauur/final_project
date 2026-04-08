@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Staff Allocation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+
+        body {
+            background-color: var(--bg-color);
+            align-items: flex-start;
+            padding-top: 2rem;
+            color: #1e293b;
+        }
+
+        .dashboard-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .dashboard-header {
+            background-color: var(--surface-color);
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-soft);
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--primary-hover);
+        }
+
+        .header-title h1 {
+            color: var(--text-main);
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.025em;
+        }
+
+        .dashboard-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        .panel {
+            background-color: var(--surface-color);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-soft);
+        }
+
+        .panel h2 {
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+            color: var(--text-main);
+            border-bottom: 2px solid #e0f2fe;
+            padding-bottom: 0.75rem;
+            font-weight: 700;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        th,
+        td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-soft);
+        }
+
+        th {
+            background-color: #e0f2fe;
+            font-weight: 700;
+            color: #0284c7;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.85rem;
+        }
+
+        tr {
+            transition: all 0.2s ease;
+        }
+
+        tr:hover {
+            background-color: #f0f9ff;
+            cursor: pointer;
+            transform: translateY(-1px);
+        }
+
+        .selected-row {
+            background-color: #e0f2fe !important;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .btn-logout {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-logout:hover {
+            background-color: #b91c1c;
+        }
+
+        .allocation-form .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .allocation-form input {
+            width: 100%;
+        }
+
+        .badge {
+            background-color: #ecfdf5;
+            color: #059669;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge.unassigned {
+            background-color: #fef2f2;
+            color: #dc2626;
+        }
+
+        .btn-danger {
+            background-color: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-danger:hover {
+            background-color: #dc2626;
+            color: white;
+        }
+
+        /* Responsive Alignments */
+        @media (max-width: 900px) {
+            .dashboard-content {
+                grid-template-columns: 1fr;
+            }
+            .dashboard-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            .dashboard-header > div {
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="header-title">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                <h1>Admin Control Panel</h1>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <a href="ward-dashboard.html" class="btn-primary" style="text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; font-weight: 500; font-size: 0.9rem; background-color: #10b981;">Ward Analytics</a>
+                <a href="register.html" class="btn-primary" style="text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; font-weight: 500; font-size: 0.9rem;">Register Staff</a>
+                <button id="navRemoveStaffBtn" class="btn-danger" style="border: none; padding: 0.5rem 1rem; border-radius: 4px; font-weight: 500; font-size: 0.9rem; cursor: pointer;">Remove Staff</button>
+                <button id="logoutBtn" class="btn-logout">Logout</button>
+            </div>
+        </header>
+
+        <main class="dashboard-content">
+            <!-- Staff List Panel -->
+            <div class="panel">
+                <h2>Staff Roster</h2>
+                <div style="overflow-x: auto;">
+                    <table id="staffTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Ward Assignments</th>
+                                <th>Total Wards</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Staff Details & Allocation Panel -->
+            <div class="panel">
+                <h2>Manage Assignments</h2>
+
+                <div id="allocationMessage" style="margin-bottom: 1rem; padding: 0.5rem; display: none; border-radius: 4px; font-size: 0.85rem; font-weight: 500; text-align: center;"></div>
+
+                <div id="staffSelectPrompt" style="color: #64748b; font-size: 0.85rem; margin-bottom: 1.5rem;">
+                    Select a staff member from the roster to view or modify their ward assignments.
+                </div>
+
+                <div id="staffDetailsContent" style="display: none;">
+                    <div style="margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px dashed #e2e8f0;">
+                        <h3 id="detailName" style="margin: 0 0 0.5rem 0; font-size: 1.1rem; color: #1e293b;">Name</h3>
+                        <p style="margin: 0; color: #64748b; font-size: 0.9rem;">Staff ID: <span id="detailId" style="font-weight: 600;"></span></p>
+                    </div>
+
+                    <h4 style="margin: 0 0 1rem 0; font-size: 0.95rem; color: #334155;">Current Allocations</h4>
+                    <ul id="allocationList" style="list-style: none; padding: 0; margin: 0 0 2rem 0;">
+                        <!-- dynamic list of allocations -->
+                    </ul>
+
+                    <h4 style="margin: 0 0 1rem 0; font-size: 0.95rem; color: #334155;">Add New Assignment</h4>
+                    <form id="allocationForm" class="allocation-form">
+                        <input type="hidden" id="staffId">
+
+                        <div class="form-group">
+                            <label for="ward_number" style="font-size: 0.85rem; color: #64748b;">Ward Selection</label>
+                            <select id="ward_number" required style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                                <option value="" disabled selected>Select Ward</option>
+                                <option value="Ward A">Ward A</option>
+                                <option value="Ward B">Ward B</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bed_number" style="font-size: 0.85rem; color: #64748b;">Bed Selection</label>
+                            <select id="bed_number" required disabled style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px;">
+                                <option value="" disabled selected>Select Bed</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn-primary" id="allocateBtn" style="width: 100%;">Assign to Ward</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const logoutBtn = document.getElementById('logoutBtn');
+        const staffTableBody = document.querySelector('#staffTable tbody');
+        const allocationForm = document.getElementById('allocationForm');
+        const staffIdInput = document.getElementById('staffId');
+        const detailName = document.getElementById('detailName');
+        const detailId = document.getElementById('detailId');
+        
+        const staffSelectPrompt = document.getElementById('staffSelectPrompt');
+        const staffDetailsContent = document.getElementById('staffDetailsContent');
+        const allocationList = document.getElementById('allocationList');
+
+        const wardInput = document.getElementById('ward_number');
+        const bedInput = document.getElementById('bed_number');
+        const allocateBtn = document.getElementById('allocateBtn');
+
+        wardInput.addEventListener('change', () => {
+            const ward = wardInput.value;
+            bedInput.innerHTML = '<option value="" disabled selected>Select Bed</option>';
+            if (ward === 'Ward A' || ward === 'Ward B') {
+                const prefix = ward === 'Ward A' ? 'A' : 'B';
+                for (let i = 1; i <= 10; i++) {
+                    const opt = document.createElement('option');
+                    opt.value = prefix + i;
+                    opt.text = prefix + i;
+                    bedInput.appendChild(opt);
+                }
+                bedInput.disabled = false;
+                allocateBtn.disabled = false;
+            } else {
+                bedInput.disabled = true;
+                allocateBtn.disabled = true;
+            }
+        });
+        const msgBox = document.getElementById('allocationMessage');
+
+        let allStaffData = [];
+
+        // Logout
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('nurse');
+            window.location.href = 'admin-login.html';
+        });
+
+        // Remove Staff (Prompt)
+        document.getElementById('navRemoveStaffBtn').addEventListener('click', async () => {
+            const staffIdStr = prompt('Enter the numeric Staff ID to completely remove from database:');
+            if (!staffIdStr) return;
+            
+            const id = parseInt(staffIdStr, 10);
+            if (isNaN(id)) return alert('Invalid ID format');
+
+            if (!confirm(`Are you sure you want to permanently delete Staff ID: ${id}?`)) return;
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/admin/staff/${id}`, { method: 'DELETE' });
+                const data = await response.json();
+                if (data.success) {
+                    staffSelectPrompt.style.display = 'block';
+                    staffDetailsContent.style.display = 'none';
+                    loadStaff();
+                    alert(`Staff ID ${id} deleted successfully.`);
+                } else {
+                    alert(data.message);
+                }
+            } catch (err) { alert('Error deleting staff'); }
+        });
+
+        // Delete Allocation
+        async function deleteAllocation(allocId) {
+            if (!confirm('Remove this ward assignment?')) return;
+            try {
+                const response = await fetch(`http://localhost:5000/api/admin/allocate/${allocId}`, { method: 'DELETE' });
+                const data = await response.json();
+                if (data.success) {
+                    loadStaff(); // Reload table and UI
+                } else {
+                    alert(data.message);
+                }
+            } catch (err) { alert('Error removing allocation'); }
+        }
+
+        // Apply Selection to Panel
+        function selectStaffRow(staffId) {
+            const staff = allStaffData.find(s => s.id === staffId);
+            if (!staff) return;
+
+            document.querySelectorAll('#staffTable tr').forEach(r => r.classList.remove('selected-row'));
+            const row = document.getElementById(`row-${staffId}`);
+            if(row) row.classList.add('selected-row');
+
+            // Switch views
+            staffSelectPrompt.style.display = 'none';
+            staffDetailsContent.style.display = 'block';
+            msgBox.style.display = 'none';
+
+            detailName.textContent = staff.name;
+            detailId.textContent = staff.id;
+            staffIdInput.value = staff.id;
+
+            // Render Allocations
+            allocationList.innerHTML = '';
+            if (staff.allocations.length === 0) {
+                allocationList.innerHTML = '<li style="color: #64748b; font-size: 0.9rem; font-style: italic;">No wards currently assigned.</li>';
+            } else {
+                staff.allocations.forEach(alloc => {
+                    const li = document.createElement('li');
+                    li.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 0.5rem;';
+                    li.innerHTML = `
+                        <div>
+                            <span class="badge" style="margin-right: 8px;">Ward: ${alloc.ward_number}</span> 
+                            <span class="badge" style="background-color: #e0e7ff; color: #3730a3;">Bed: ${alloc.bed_number}</span>
+                        </div>
+                        <button onclick="deleteAllocation(${alloc.id})" class="btn-danger" style="margin: 0; padding: 2px 6px; font-size: 0.7rem;">Remove</button>
+                    `;
+                    allocationList.appendChild(li);
+                });
+            }
+
+            // Reset inputs
+            wardInput.selectedIndex = 0;
+            bedInput.innerHTML = '<option value="" disabled selected>Select Bed</option>';
+            bedInput.disabled = true;
+            allocateBtn.disabled = true;
+        }
+
+        // Load Staff
+        async function loadStaff() {
+            try {
+                const response = await fetch('http://localhost:5000/api/admin/staff');
+                const data = await response.json();
+
+                staffTableBody.innerHTML = '';
+
+                if (data.success && data.staff.length > 0) {
+                    allStaffData = data.staff;
+                    data.staff.forEach(staff => {
+                        const tr = document.createElement('tr');
+                        tr.id = `row-${staff.id}`;
+
+                        // Build badges HTML
+                        let badgesHtml = '';
+                        if (staff.allocations.length === 0) {
+                            badgesHtml = '<span class="badge unassigned">Unassigned</span>';
+                        } else {
+                            staff.allocations.forEach(alloc => {
+                                badgesHtml += `<span class="badge" style="margin: 2px;">${alloc.ward_number} (${alloc.bed_number})</span><br>`;
+                            });
+                        }
+
+                        tr.innerHTML = `
+                            <td>${staff.id}</td>
+                            <td><strong>${staff.name}</strong></td>
+                            <td>${badgesHtml}</td>
+                            <td><strong style="color: var(--primary-color);">${staff.allocations.length}</strong> assigned</td>
+                        `;
+
+                        tr.addEventListener('click', () => selectStaffRow(staff.id));
+                        staffTableBody.appendChild(tr);
+                    });
+
+                    // Re-select if someone is already chosen
+                    if (staffIdInput.value) {
+                        selectStaffRow(parseInt(staffIdInput.value));
+                    }
+                } else {
+                    staffTableBody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No staff records found.</td></tr>';
+                }
+            } catch (err) {
+                console.error("Failed to load staff", err);
+            }
+        }
+
+        // Handle Allocation Submission
+        allocationForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const staffId = staffIdInput.value;
+            const ward_number = wardInput.value.trim();
+            const bed_number = bedInput.value.trim();
+
+            if (!staffId || !ward_number || !bed_number) return;
+
+            allocateBtn.textContent = 'Assigning...';
+            allocateBtn.disabled = true;
+
+            try {
+                const response = await fetch('http://localhost:5000/api/admin/allocate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ staffId, ward_number, bed_number })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    showMessage('Assignment added successfully!', true);
+                    wardInput.value = '';
+                    bedInput.value = '';
+                    loadStaff(); // Reload the table to reflect changes
+                } else {
+                    showMessage(data.message || 'Error saving assignment', false);
+                }
+            } catch (err) {
+                showMessage('Network error occurred.', false);
+            } finally {
+                allocateBtn.textContent = 'Assign to Ward';
+                allocateBtn.disabled = false;
+            }
+        });
+
+        function showMessage(msg, isSuccess) {
+            msgBox.textContent = msg;
+            msgBox.style.display = 'block';
+            msgBox.style.backgroundColor = isSuccess ? '#d1fae5' : '#fee2e2';
+            msgBox.style.color = isSuccess ? '#059669' : '#dc2626';
+            msgBox.style.border = `1px solid ${isSuccess ? '#a7f3d0' : '#fecaca'}`;
+            setTimeout(() => { msgBox.style.display = 'none'; }, 3000);
+        }
+
+        // Init
+        loadStaff();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,219 @@
+/* CSS Architecture: Modern Medical Platform */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Premium Oceanic & Medical Palette */
+    --primary-color: #0ea5e9; /* Sky Blue */
+    --primary-gradient: linear-gradient(135deg, #0ea5e9, #2563eb);
+    --primary-hover: #0284c7;
+    
+    --bg-color: #f1f5f9; /* Soft Slate Background */
+    --surface-color: #ffffff;
+    
+    --text-main: #0f172a; 
+    --text-muted: #64748b;
+    
+    --error: #ef4444;
+    --error-bg: #fef2f2;
+    --success: #10b981;
+    --success-bg: #ecfdf5;
+
+    --border-soft: #e2e8f0;
+    
+    /* Premium Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 25px -3px rgba(14, 165, 233, 0.15), 0 4px 6px -2px rgba(14, 165, 233, 0.05);
+}
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    line-height: 1.5;
+}
+
+/* Core Container Floating Effect */
+.login-container {
+    background-color: var(--surface-color);
+    padding: 3rem 2.5rem;
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 440px; 
+    border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+/* Header & Logos */
+.login-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.hospital-logo {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 16px;
+    background: var(--primary-gradient);
+    color: var(--surface-color);
+    margin-bottom: 1.25rem;
+    box-shadow: var(--shadow-md);
+    transform: rotate(-5deg);
+    transition: transform 0.3s ease;
+}
+.login-container:hover .hospital-logo {
+    transform: rotate(0deg);
+}
+
+.login-header h2 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: var(--text-main);
+    margin-bottom: 0.5rem;
+}
+
+.login-header p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+/* Forms & Inputs */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: left;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.form-group input, .form-group select {
+    padding: 0.875rem 1.25rem;
+    border: 2px solid var(--border-soft);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    background-color: #f8fafc;
+    color: var(--text-main);
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background-color: var(--surface-color);
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
+}
+
+/* Alerts */
+.error-message {
+    background-color: var(--error-bg);
+    color: var(--error);
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    text-align: center;
+    border: 1px solid #fecaca;
+    font-weight: 500;
+    box-shadow: var(--shadow-sm);
+}
+
+.success-message {
+    background-color: var(--success-bg);
+    color: var(--success);
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    text-align: center;
+    border: 1px solid #a7f3d0;
+    font-weight: 500;
+    box-shadow: var(--shadow-sm);
+}
+
+/* Buttons */
+.btn-primary {
+    background: var(--primary-gradient);
+    color: var(--surface-color);
+    border: none;
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 0.025em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-md);
+    margin-top: 0.5rem;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-primary:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Footer Section */
+.login-footer {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-soft);
+}
+
+.login-footer p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.login-footer a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 700;
+    transition: color 0.2s;
+}
+
+.login-footer a:hover {
+    color: var(--primary-hover);
+    text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+    .login-container {
+        margin: 1rem;
+        padding: 2rem 1.5rem;
+    }
+}

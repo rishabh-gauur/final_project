@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Staff Portal - Registration</title>
+    <!-- Include Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="login-container" style="max-width: 800px;">
+        <div class="login-header">
+            <div class="hospital-logo">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <line x1="19" y1="8" x2="19" y2="14"></line>
+                    <line x1="22" y1="11" x2="16" y2="11"></line>
+                </svg>
+            </div>
+            <h2>Register Staff</h2>
+            <p>Create a new secure staff account</p>
+        </div>
+
+        <form id="registerForm" class="login-form">
+            <!-- Error message container (hidden by default) -->
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+            <!-- Success message container -->
+            <div id="successMessage" class="success-message"
+                style="display: none; background-color: #d1fae5; color: #047857; padding: 0.75rem; border-radius: 6px; font-size: 0.875rem; text-align: center; border: 1px solid #a7f3d0;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem;">
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" placeholder="Enter full name" required>
+                </div>
+
+
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" name="phone" placeholder="Enter phone number" required>
+            </div>
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Choose a username" required
+                    autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Create a password" required
+                    autocomplete="new-password">
+            </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password"
+                        required autocomplete="new-password">
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary" id="registerBtn" style="margin-top: 0.5rem;">Register Account</button>
+        </form>
+
+    </div>
+
+    <script>
+        const registerForm = document.getElementById('registerForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const registerBtn = document.getElementById('registerBtn');
+
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            // Basic client-side validation
+            if (!name || !phone || !username || !password || !confirmPassword) {
+                showError('Please fill in all fields.');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showError('Passwords do not match.');
+                return;
+            }
+
+            // Hide previous messages and show loading state
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            registerBtn.textContent = 'Registering...';
+            registerBtn.disabled = true;
+
+            try {
+                // Send AJAX request to our API endpoint
+                const response = await fetch('http://localhost:5000/api/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, mobile_number: phone, user_id: username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    successMessage.textContent = 'Account created successfully! Routing to Login...';
+                    successMessage.style.display = 'block';
+
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 800);
+                } else {
+                    // Registration failed (e.g. username taken)
+                    showError(data.error || 'Registration failed. Please try again.');
+                    registerBtn.textContent = 'Register Account';
+                    registerBtn.disabled = false;
+                }
+            } catch (error) {
+                showError('A network error occurred. Please try again.');
+                registerBtn.textContent = 'Register Account';
+                registerBtn.disabled = false;
+            }
+        });
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Live Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body { background-color: #f8fafc; padding-top: 2rem; }
+        .container { max-width: 900px; margin: 0 auto; padding: 0 1rem; }
+        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: var(--shadow-md); border: 1px solid var(--border-soft); margin-bottom: 2rem; }
+        .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #e2e8f0; padding-bottom: 1rem; margin-bottom: 1.5rem; }
+        .title h1 { margin: 0; color: #1e293b; font-size: 1.8rem; font-weight: 800; }
+        .title p { margin: 0.25rem 0 0 0; color: #64748b; font-weight: 500; }
+        
+        .status-badge { padding: 0.5rem 1rem; border-radius: 999px; font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .Critical { background-color: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; }
+        .Stable { background-color: #ecfdf5; color: #059669; border: 1px solid #6ee7b7; }
+        .Observation { background-color: #fffbeb; color: #d97706; border: 1px solid #fcd34d; }
+        
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+        .vital-box { background: #f8fafc; padding: 1.5rem; border-radius: 8px; border: 1px solid #e2e8f0; text-align: center; }
+        .vital-box label { display: block; color: #64748b; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; }
+        .vital-box span { font-size: 2rem; font-weight: 800; color: #334155; }
+        .vital-box small { font-size: 0.9rem; color: #94a3b8; font-weight: 600; margin-left: 4px; }
+        
+        .btn-back { background-color: #e2e8f0; color: #475569; padding: 0.5rem 1rem; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block; margin-bottom: 1rem; }
+        .btn-back:hover { background-color: #cbd5e1; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="dashboard.html" class="btn-back">← Back to Dashboard</a>
+        
+        <div class="card" id="reportContent">
+            <div style="text-align: center; padding: 2rem;">Loading Patient Data...</div>
+        </div>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const ward = params.get('ward');
+        const bed = params.get('bed');
+        
+        async function fetchPatient() {
+            try {
+                const res = await fetch(`http://localhost:5000/api/patient/${ward}/${bed}`);
+                const data = await res.json();
+                const content = document.getElementById('reportContent');
+                
+                if (data.success && data.patient) {
+                    const p = data.patient;
+                    const v = p.vitals;
+                    content.innerHTML = `
+                        <div class="header">
+                            <div class="title">
+                                <h1>${p.name}</h1>
+                                <p>Patient ID: ${p.id} | Location: ${ward} - Bed ${bed}</p>
+                            </div>
+                            <div class="status-badge ${p.status}">${p.status}</div>
+                        </div>
+                        <div style="margin-bottom: 1rem; text-align: right; font-size: 0.85rem; color: #64748b; font-weight: 600;">
+                            Live Anomaly Probability: ${(p.risk_probability * 100).toFixed(1)}%
+                        </div>
+                        <div class="grid">
+                            <div class="vital-box">
+                                <label>Systolic BP</label>
+                                <span>${v.bp}</span><small>mmHg</small>
+                            </div>
+                            <div class="vital-box">
+                                <label>Heart Rate</label>
+                                <span>${v.heart_rate}</span><small>bpm</small>
+                            </div>
+                            <div class="vital-box">
+                                <label>SpO2</label>
+                                <span>${v.spo2}</span><small>%</small>
+                            </div>
+                            <div class="vital-box">
+                                <label>Temperature</label>
+                                <span>${v.temperature}</span><small>°C</small>
+                            </div>
+                            <div class="vital-box">
+                                <label>Resp. Rate</label>
+                                <span>${v.resp_rate}</span><small>rpm</small>
+                            </div>
+                            <div class="vital-box">
+                                <label>MAP</label>
+                                <span>${v.map}</span><small>mmHg</small>
+                            </div>
+                            <div class="vital-box" style="grid-column: 1 / -1; grid-template-columns: 1fr;">
+                                <label>ECG Index / Score</label>
+                                <span>${v.ecg}</span><small>/ 100</small>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    content.innerHTML = `<div style="text-align: center; color: #ef4444; font-weight: 600; padding: 2rem;">No Patient Assigned or Data Unavailable.</div>`;
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // Live refresh every 2 seconds
+        fetchPatient();
+        setInterval(fetchPatient, 2000);
+    </script>
+</body>
+</html>

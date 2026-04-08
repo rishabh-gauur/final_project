@@ -12,8 +12,8 @@ def train():
 
     print("Loading data...")
     if not os.path.exists(data_path):
-        print(f"Error: Could not find {data_path}. Run generate_data.py first.")
-        return
+        import generate_data
+        generate_data.generate_data()
 
     df = pd.read_csv(data_path)
     

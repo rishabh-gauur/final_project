@@ -6,8 +6,8 @@ import requests
 
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
-def send_sms_alert(mobile_number, patient_data, risk_probability):
-    message_body = f"URGENT: High health risk detected! (Probability: {risk_probability:.1%})\nPatient Stats: SpO2={patient_data.get('spo2')}%, HR={patient_data.get('heart_rate')} bpm, BP={patient_data.get('systolic_bp')}/{patient_data.get('diastolic_bp')}\nPlease check patient immediately."
+def send_sms_alert(mobile_number, patient_name, ward, bed, patient_data, risk_probability):
+    message_body = f"CRITICAL: {patient_name} in {ward} / Bed {bed}! (Risk: {risk_probability:.1%})\nVitals: SpO2={patient_data.get('spo2')}%, HR={patient_data.get('heart_rate')} bpm, BP={patient_data.get('bp')}, Resp={patient_data.get('resp_rate')}\nPlease check patient immediately."
 
     
     # 1. Fire native Windows Push Notification

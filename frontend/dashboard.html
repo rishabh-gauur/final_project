@@ -3,85 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - HealthAlert</title>
+    <title>Hospital Staff Portal - Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body { background-color: #f3f4f6; align-items: flex-start; padding-top: 2rem; }
+        .dashboard-container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+        .dashboard-header { background-color: var(--surface-color); border-radius: 12px; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-md); margin-bottom: 2rem; border: 1px solid var(--border-soft); }
+        .header-title { display: flex; align-items: center; gap: 1rem; color: var(--primary-color); }
+        .header-title h1 { color: var(--text-main); font-size: 1.75rem; margin: 0; font-weight: 800; }
+        .dashboard-content { background-color: var(--surface-color); border-radius: 12px; padding: 3rem; text-align: center; box-shadow: var(--shadow-lg); border: 1px solid var(--border-soft); }
+        .dashboard-content h2 { color: var(--text-main); margin-bottom: 1rem; font-weight: 800; }
+        .btn-logout { background-color: #ef4444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; font-weight: 500; cursor: pointer; transition: background-color 0.2s; }
+        .btn-logout:hover { background-color: #b91c1c; }
+        
+        #notificationToast {
+            position: fixed; top: 20px; right: 20px; background-color: #ef4444; color: white;
+            padding: 1rem; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            display: none; z-index: 50; max-width: 350px; border-left: 5px solid #7f1d1d;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        
+        .bed-link {
+            display: flex; justify-content: space-between; align-items: center; padding: 1rem; 
+            background-color: white; border: 1px solid #e2e8f0; border-radius: 8px; 
+            border-left: 4px solid var(--primary-color); margin-bottom: 0.75rem;
+            text-decoration: none; color: #1e293b; transition: all 0.2s;
+        }
+        .bed-link:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); border-left-color: #4338ca; }
+    </style>
 </head>
 <body>
-
-    <div class="glass-card dashboard-container">
-        <div class="header">
-            <div>
-                <h1 style="text-align: left; margin:0;" id="welcome-msg">Dashboard</h1>
-                <p style="color: var(--text-muted); margin-top:0.5rem;" id="nurse-info">Nurse ID: ...</p>
-            </div>
-            <button class="btn btn-secondary" style="width: auto;" onclick="logout()">Log Out</button>
-        </div>
-
-        <p>Submit patient vital signs. The ML model will analyze the data to predict risks and trigger an SMS alert if needed.</p>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
-            <!-- Patient Input Form -->
-            <div>
-                <h3 style="margin-bottom: 1rem;">Patient Telemetry</h3>
-                <form id="predict-form">
-                    <div class="stats-grid">
-                        <div class="input-group">
-                            <label for="hr">Heart Rate (bpm)</label>
-                            <input type="number" id="hr" required placeholder="e.g. 75" value="75">
-                        </div>
-                        <div class="input-group">
-                            <label for="sys_bp">Systolic BP</label>
-                            <input type="number" id="sys_bp" required placeholder="e.g. 120" value="120">
-                        </div>
-                        <div class="input-group">
-                            <label for="dia_bp">Diastolic BP</label>
-                            <input type="number" id="dia_bp" required placeholder="e.g. 80" value="80">
-                        </div>
-                        <div class="input-group">
-                            <label for="spo2">SpO2 (%)</label>
-                            <input type="number" id="spo2" required placeholder="e.g. 98" value="98">
-                        </div>
-                        <div class="input-group">
-                            <label for="temp">Temperature (°C)</label>
-                            <input type="number" step="0.1" id="temp" required placeholder="e.g. 36.5" value="36.5">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn" style="margin-top: 1rem;">Analyze Vitals</button>
-                </form>
-            </div>
-
-            <!-- Results Section -->
-            <div>
-                <h3 style="margin-bottom: 1rem;">ML Prediction Results</h3>
-                <div class="glass-card" style="padding: 1.5rem; margin-bottom: 1rem;">
-                    <p style="margin-bottom: 0.5rem;"><strong>Risk Probability:</strong> <span id="res-prob">--</span></p>
-                    <p><strong>Diagnosis:</strong> <span id="res-diag">--</span></p>
-                </div>
-
-                <div id="alert-box" class="alert-box">
-                    <h3>SMS Alert Dispatched</h3>
-                    <p>A high health risk predictability was found. An emergency notification was dispatched to your mobile number.</p>
-                </div>
-                
-                <div id="safe-box" class="alert-box success">
-                    <h3>Patient Stable</h3>
-                    <p>The ML model predicts normal physiology. No intervention necessary.</p>
-                </div>
-            </div>
-        </div>
+    <div id="notificationToast">
+        <h4 style="margin:0 0 0.25rem 0; font-weight: 700;">⚠️ URGENT PATIENT ANOMALY</h4>
+        <p id="notificationText" style="margin:0; font-size: 0.9rem; line-height: 1.4;"></p>
     </div>
 
-    <script src="app.js"></script>
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="header-title">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                <h1>Staff Portal</h1>
+            </div>
+            <div>
+                <button id="logoutBtn" class="btn-logout">Logout</button>
+            </div>
+        </header>
+
+        <main class="dashboard-content">
+            <h2 id="welcomeText">Welcome...</h2>
+            <p>Your current bed assignments and patient responsibilities are listed below. Click to view detailed patient reports.</p>
+            
+            <div id="allocationBox" style="margin-top: 2rem; padding: 2rem; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; text-align: left; display: inline-block; min-width: 400px; box-shadow: var(--shadow-sm);">
+                <p style="margin-bottom: 1rem; color: #64748b; font-size: 0.95rem; font-weight: 700; text-transform: uppercase;">Assigned Wards & Beds</p>
+                <div id="allocationsContainer" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <!-- Multiple allocations rendered here -->
+                </div>
+            </div>
+        </main>
+    </div>
+
     <script>
-        // Check Auth immediately on dashboard load
-        const nurse = JSON.parse(localStorage.getItem('nurse'));
-        if (!nurse) {
-            window.location.href = 'index.html';
-        } else {
-            document.getElementById('welcome-msg').innerText = `Hello, ${nurse.name}`;
-            document.getElementById('nurse-info').innerText = `Nurse ID: ${nurse.user_id} | Phone: ${nurse.mobile_number}`;
+        const logoutBtn = document.getElementById('logoutBtn');
+        let currentNurseId = null;
+
+        async function loadProfile() {
+            try {
+                const nurseStr = localStorage.getItem('nurse');
+                if (!nurseStr) return window.location.href = 'login.html';
+                
+                const cachedNurse = JSON.parse(nurseStr);
+                currentNurseId = cachedNurse.id;
+                
+                const response = await fetch(`http://localhost:5000/api/staff/${cachedNurse.id}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const profile = data.data;
+                    document.getElementById('welcomeText').textContent = `Welcome, ${profile.name}`;
+                    const container = document.getElementById('allocationsContainer');
+                    
+                    if (!profile.allocations || profile.allocations.length === 0) {
+                        container.innerHTML = '<span style="color:#ef4444; font-weight:600;">You are currently unassigned. Please contact admin.</span>';
+                    } else {
+                        container.innerHTML = profile.allocations.map(a => `
+                            <a href="patient-report.html?ward=${a.ward_number}&bed=${a.bed_number}" class="bed-link">
+                                <div>
+                                    <strong style="color:var(--primary-color);">${a.ward_number}</strong>
+                                    <span style="color: #cbd5e1; margin: 0 0.5rem;">|</span>
+                                    <span>Bed: <strong>${a.bed_number}</strong></span>
+                                </div>
+                                <span style="font-size:0.85rem; background-color:#e0e7ff; color:#3730a3; padding: 2px 8px; border-radius:12px; font-weight:600;">View Report →</span>
+                            </a>
+                        `).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load profile', error);
+            }
         }
+
+        logoutBtn.addEventListener('click', () => {
+            localStorage.removeItem('nurse');
+            window.location.href = 'login.html';
+        });
+
+        // Push Notifications Engine (Polling Simulation)
+        let lastNotificationStr = '';
+        async function fetchNotifications() {
+            if (!currentNurseId) return;
+            try {
+                const res = await fetch(`http://localhost:5000/api/notifications/${currentNurseId}`);
+                const data = await res.json();
+                
+                if (data.success && data.notifications.length > 0) {
+                    // Just take the latest
+                    const latest = data.notifications[0];
+                    const repStr = JSON.stringify(latest);
+                    if (repStr !== lastNotificationStr) {
+                        lastNotificationStr = repStr;
+                        // Trigger toast
+                        const toast = document.getElementById('notificationToast');
+                        document.getElementById('notificationText').innerHTML = 
+                            `<strong>${latest.patient_name}</strong> in ${latest.ward} ${latest.bed}<br/>${latest.message}`;
+                        toast.style.display = 'block';
+                        
+                        setTimeout(() => { toast.style.display = 'none'; }, 8000);
+                    }
+                }
+            } catch (e) {}
+        }
+
+        loadProfile().then(() => {
+            setInterval(fetchNotifications, 3000); // Check every 3 seconds
+        });
     </script>
 </body>
 </html>

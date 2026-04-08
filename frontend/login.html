@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Staff Portal - Login</title>
+    <!-- Include Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="hospital-logo">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                </svg>
+            </div>
+            <h2>Staff Portal</h2>
+            <p>Secure login for healthcare professionals</p>
+        </div>
+
+        <form id="loginForm" class="login-form">
+            <!-- Error message container (hidden by default) -->
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+            <div class="form-group" style="margin-bottom: 0.5rem;">
+                <label for="role" style="font-weight: 700; color: var(--primary-color);">Login As</label>
+                <select id="role" name="role" style="padding: 0.75rem 1rem; border: 2px solid var(--primary-color); border-radius: 6px; font-size: 1rem; font-family: inherit; background-color: #f8fafc;" required>
+                    <option value="staff" selected>Staff Portal</option>
+                    <option value="admin">Admin Control Panel</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your staff username" required
+                    autocomplete="username">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required
+                    autocomplete="current-password">
+            </div>
+
+            <button type="submit" class="btn-primary" id="loginBtn">Login to Portal</button>
+        </form>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const loginBtn = document.getElementById('loginBtn');
+        const roleSelect = document.getElementById('role');
+
+        roleSelect.addEventListener('change', (e) => {
+            if (e.target.value === 'admin') {
+                window.location.href = 'admin-login.html';
+            }
+        });
+
+        // Check if there was an error in the query parameters (e.g., from server redirect)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('error')) {
+            showError(urlParams.get('error'));
+        }
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            // Basic client-side validation
+            if (!username || !password) {
+                showError('Please fill in both fields.');
+                return;
+            }
+
+            // Hide previous errors and show loading state
+            errorMessage.style.display = 'none';
+            loginBtn.textContent = 'Authenticating...';
+            loginBtn.disabled = true;
+
+            try {
+                // Send AJAX request to our API endpoint
+                const response = await fetch('http://localhost:5000/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ user_id: username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Successful login! Save nurse profile to local storage and redirect
+                    localStorage.setItem('nurse', JSON.stringify(data.nurse));
+                    window.location.href = 'dashboard.html';
+                } else {
+                    // Login failed (e.g. bad password)
+                    showError(data.error || 'Login failed. Please try again.');
+                    loginBtn.textContent = 'Login to Portal';
+                    loginBtn.disabled = false;
+                }
+            } catch (error) {
+                // Network error or server crashed
+                showError('A network error occurred. Please try again.');
+                loginBtn.textContent = 'Login to Portal';
+                loginBtn.disabled = false;
+            }
+        });
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+    </script>
+</body>
+
+</html>
