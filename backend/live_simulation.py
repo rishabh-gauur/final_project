@@ -106,24 +106,16 @@ def simulate_loop():
                             if (now_time - p.get('last_sms_sent', 0)) > 60:
                                 p['last_sms_sent'] = now_time
                                 try:
-                                    # Find assigned staff AND all admins to ensure message is delivered
-                                    conn = get_db_connection()
-                                    recipients = conn.execute("""
-                                        SELECT u.mobile_number FROM users u 
-                                        LEFT JOIN allocations a ON u.id = a.user_id 
-                                        WHERE (a.ward_number=? AND a.bed_number=?) OR u.role='admin'
-                                    """, (w, b)).fetchall()
-                                    conn.close()
-                                    
-                                    unique_numbers = set(r['mobile_number'] for r in recipients if r['mobile_number'])
-                                    
-                                    for target_phone in unique_numbers:
-                                        # Trigger Pushover broadcast via background thread
-                                        t = threading.Thread(target=send_sms_alert, args=(target_phone, p['name'], w, b, v, prob))
-                                        t.daemon = True
-                                        t.start()
+                                    from notifier import send_mobile_push
+                                    # Automated Broadcast: Send directly to your account ID
+                                    t = threading.Thread(
+                                        target=send_mobile_push, 
+                                        args=(p['name'], w, b, v, prob)
+                                    )
+                                    t.daemon = True
+                                    t.start()
                                 except Exception as e:
-                                    print(f"Error triggering SMS: {e}")
+                                    print(f"Error triggering Push Alert: {e}")
                                     
                         else:
                             p['status'] = 'Stable' if prob < 0.3 else 'Observation'

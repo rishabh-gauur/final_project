@@ -248,20 +248,17 @@ def get_notifications(user_id):
 @app.route('/api/admin/test_alert', methods=['POST'])
 def test_admin_alert():
     try:
-        from notifier import send_sms_alert
-        # Mock vitals for test
+        from notifier import send_mobile_push
+        # Mock vitals for manual test
         vitals = {'spo2': 90, 'heart_rate': 120, 'bp': '140/90', 'resp_rate': 24}
-        # Send to "admin" mobile number
-        conn = get_db_connection()
-        admin = conn.execute("SELECT mobile_number FROM users WHERE role='admin' LIMIT 1").fetchone()
-        conn.close()
         
-        target = admin['mobile_number'] if admin else "1234567890"
+        # Trigger Broadcast in background
+        threading.Thread(
+            target=send_mobile_push, 
+            args=("MANUAL TEST", "Admin", "Unit 1", vitals, 0.99)
+        ).start()
         
-        # Trigger in background
-        threading.Thread(target=send_sms_alert, args=(target, "TEST SYSTEM", "Admin", "Unit 1", vitals, 0.99)).start()
-        
-        return jsonify({'success': True, 'message': f'Test alert dispatched to {target}'})
+        return jsonify({'success': True, 'message': 'Test push alert dispatched to your account ID.'})
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)})
 

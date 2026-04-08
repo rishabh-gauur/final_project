@@ -5,29 +5,28 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), 'backend'))
 
 try:
-    from notifier import send_sms_alert
-    print("[ok] Notifier module imported successfully.")
+    from notifier import send_mobile_push
+    print("[ok] Notifier module (New Broadcast Mode) imported successfully.")
 except ImportError as e:
     print(f"[error] Failed to import notifier: {e}")
     sys.exit(1)
 
 def test_alert():
-    print("\n--- Starting Alert Test ---")
+    print("\n--- Starting Automatic Broadcast Test ---")
     
     # Mock data
-    dummy_phone = "1234567890"
-    dummy_name = "TEST PATIENT"
-    dummy_ward = "Test Ward"
-    dummy_bed = "T1"
+    dummy_name = "SIMULATED CRITICAL PATIENT"
+    dummy_ward = "Ward A"
+    dummy_bed = "A1"
     dummy_vitals = {
-        'spo2': 85,
-        'heart_rate': 140,
-        'bp': '160/100',
-        'resp_rate': 30
+        'spo2': 82,
+        'heart_rate': 145,
+        'bp': '170/110',
+        'resp_rate': 32
     }
-    dummy_prob = 0.95
+    dummy_prob = 0.98
 
-    print(f"Triggering Pushover alert for {dummy_name}...")
+    print(f"Broadcasting urgent push alert for {dummy_name}...")
     
     # Check environment variables
     pushover_user = os.environ.get('PUSHOVER_USER_KEY')
@@ -35,16 +34,15 @@ def test_alert():
     
     if not pushover_user or not pushover_app:
         print("[warning] PUSHOVER credentials not found in environment!")
-        print("Note: If you are running this locally, you must set them in your terminal or .env file.")
+        print("NOTE: On Render, you MUST set these in the dashboard Environment Variables.")
     
-    success = send_sms_alert(dummy_phone, dummy_name, dummy_ward, dummy_bed, dummy_vitals, dummy_prob)
+    success = send_mobile_push(dummy_name, dummy_ward, dummy_bed, dummy_vitals, dummy_prob)
     
     if success:
-        print("\n[success] Internal logic executed successfully.")
-        print("Check your phone/Pushover app for a notification.")
-        print("Check the Render logs (if running in cloud) for 'success' message.")
+        print("\n[success] Automated Broadcast Hand-off Successful!")
+        print("Check all devices logged into your Pushover ID.")
     else:
-        print("\n[fail] Alert failed to trigger. Check the error messages above.")
+        print("\n[fail] Alert failed. Re-verify your User Key and App Token.")
 
 if __name__ == "__main__":
     test_alert()

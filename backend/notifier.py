@@ -4,42 +4,32 @@ import requests
 
 load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
-def send_sms_alert(mobile_number, patient_name, ward, bed, patient_data, risk_probability):
+def send_mobile_push(patient_name, ward, bed, patient_data, risk_probability):
     message_body = f"CRITICAL: {patient_name} in {ward} / Bed {bed}! (Risk: {risk_probability:.1%})\nVitals: SpO2={patient_data.get('spo2')}%, HR={patient_data.get('heart_rate')} bpm, BP={patient_data.get('bp')}, Resp={patient_data.get('resp_rate')}\nPlease check patient immediately."
 
-    # 1. Fire native OS Push Notification (Windows only, skip on Linux/cloud)
-    try:
-        from plyer import notification
-        notification.notify(
-            title="URGENT HEALTH ALERT",
-            message=message_body,
-            app_name="HealthAlert System",
-            timeout=10
-        )
-    except Exception as e:
-        print(f"OS notification failed (expected on Linux): {e}")
-
-    # 2. Fire Pushover Notification (Replacing SMS)
+    # 1. Fire Pushover Notification (Direct to Account ID)
     pushover_user_key = os.environ.get('PUSHOVER_USER_KEY')
     pushover_app_token = os.environ.get('PUSHOVER_APP_TOKEN')
     
     if not pushover_user_key or not pushover_app_token or pushover_app_token == 'your_app_token_here':
-        print("[error] Pushover not fully configured in .env file!")
+        print("[error] Pushover not fully configured in .env or Render variables!")
         return False
         
     try:
-        print("Sending Pushover Mobile Notification...")
+        print(f"Broadcasting Mobile Push Alert for {patient_name}...")
         resp = requests.post("https://api.pushover.net/1/messages.json", data={
             "token": pushover_app_token,
             "user": pushover_user_key,
             "message": message_body,
-            "title": "URGENT HEALTH ALERT"
+            "title": "URGENT HEALTH ALERT",
+            "priority": 1  # High priority bypasses quiet hours
         })
         if resp.ok:
-            print(f"[success] Pushover Mobile Notification sent successfully!")
+            print(f"[success] Mobile Push Alert sent to your devices!")
+            return True
         else:
-            print(f"[error] Failed to send Pushover notification: {resp.text}")
+            print(f"[error] API response: {resp.text}")
     except Exception as e:
-        print(f"[error] Pushover request failed: {e}")
+        print(f"[error] Request failed: {e}")
 
-    return True
+    return False
