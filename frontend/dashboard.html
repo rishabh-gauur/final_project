@@ -136,7 +136,8 @@
         }
 
         loadProfile().then(() => {
-            setInterval(fetchNotifications, 3000); // Check every 3 seconds
+            setInterval(fetchNotifications, 3000); // Check every 3 seconds for anomalies
+            setInterval(loadProfile, 5000); // Refresh assignments every 5 seconds
         });
     </script>
 </body>
