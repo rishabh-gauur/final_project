@@ -7,7 +7,7 @@ import pandas as pd
 import joblib
 from datetime import datetime
 from database import get_db_connection
-from notifier import send_sms_alert
+from notifier import send_mobile_push
 
 DIR_PATH = os.path.dirname(__file__)
 LIVE_DATA_FILE = os.path.join(DIR_PATH, 'live_patients.json')
