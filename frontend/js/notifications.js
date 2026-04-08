@@ -3,7 +3,8 @@
 
 (function() {
     // Configuration
-    const API_BASE = 'https://final-project-jjw5.onrender.com';
+    // If we are on Render, use relative path. Otherwise, use the fallback Render URL.
+    const API_BASE = window.location.hostname.includes('onrender.com') ? '' : 'https://final-project-jjw5.onrender.com';
     const POLL_INTERVAL = 4000; // 4 seconds
     let lastNotificationId = null;
 

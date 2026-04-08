@@ -206,7 +206,8 @@
         <script>
             async function checkSystemHealth() {
                 try {
-                    const res = await fetch('https://final-project-jjw5.onrender.com/api/admin/status');
+                    const apiBase = window.location.hostname.includes('onrender.com') ? '' : 'https://final-project-jjw5.onrender.com';
+                    const res = await fetch(`${apiBase}/api/admin/status`);
                     const data = await res.json();
                     
                     const simSpan = document.getElementById('simStatus');

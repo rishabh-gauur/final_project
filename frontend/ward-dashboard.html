@@ -229,7 +229,8 @@
                     bedTableBody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Loading matrix data...</td></tr>';
                 }
                 
-                const response = await fetch('https://final-project-jjw5.onrender.com/api/admin/ward/' + encodeURIComponent(ward));
+                const apiBase = window.location.hostname.includes('onrender.com') ? '' : 'https://final-project-jjw5.onrender.com';
+                const response = await fetch(`${apiBase}/api/admin/ward/` + encodeURIComponent(ward));
                 
                 // If unauthorized or not admin, it might redirect to login.html due to interceptors/fetch wrapper,
                 // but fetch will just resolve. Let's gracefully handle non-ok.

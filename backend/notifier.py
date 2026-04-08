@@ -25,12 +25,14 @@ def send_mobile_push(patient_name, ward, bed, patient_data, risk_probability):
     pushover_app_token = os.environ.get('PUSHOVER_APP_TOKEN')
     
     if not pushover_user_key or not pushover_app_token:
-        error_msg = "Pushover keys missing from Environment Variables (Check Render Dashboard!)"
-        print(f"[error] {error_msg}")
+        error_msg = "!!! [CRITICAL CONFIG ERROR] Pushover keys (User Key or App Token) are missing from Render Dashboard! Mobile push will NOT work until you add them."
+        print("\n" + "!"*80)
+        print(f"{error_msg}")
+        print("!"*80 + "\n")
         return False, error_msg
 
     try:
-        print(f"Broadcasting Pushover Alert for {patient_name}...")
+        print(f"DEBUG: Attempting Pushover Broadcast to Account ID for patient {patient_name}...")
         resp = requests.post("https://api.pushover.net/1/messages.json", data={
             "token": pushover_app_token,
             "user": pushover_user_key,
@@ -39,11 +41,15 @@ def send_mobile_push(patient_name, ward, bed, patient_data, risk_probability):
             "priority": 1
         })
         if resp.ok:
-            print(f"[success] Pushover Mobile Push sent successfully!")
+            print(f"[success] Pushover Mobile Push sent perfectly to your account!")
             return True, "Alert sent to your Pushover App!"
         else:
-            return False, f"Pushover Rejected: {resp.text}"
+            error_msg = f"!!! [API REJECTED] Pushover returned an error: {resp.text}. Check if your keys are valid."
+            print(f"\n{error_msg}\n")
+            return False, error_msg
     except Exception as e:
-        return False, f"Connection Failure: {str(e)}"
+        error_msg = f"!!! [NETWORK ERROR] Failed to reach Pushover API: {str(e)}"
+        print(f"\n{error_msg}\n")
+        return False, error_msg
 
     return False, "Unknown Error"
